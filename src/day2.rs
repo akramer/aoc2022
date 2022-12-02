@@ -36,13 +36,11 @@ pub fn rps_score1(them: i32, me: i32) -> i32 {
 #[aoc(day2, part2)]
 pub fn day2_part2(input: &str) -> i32 {
     let mut score = 0;
-    println!("-1 % 3 = {}", -1 % 3);
     for l in input.lines() {
         let mut play = l.split_whitespace();
         let them = rps_value(play.next().unwrap());
         let outcome = play.next().unwrap();
         score += rps_score2(them, outcome);
-        //println!("Input: {}, them: {}, outcome: {} yields score of {}", l, them, outcome, rps_score2(them, outcome));
     }
     return score;
 }

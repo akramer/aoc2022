@@ -21,8 +21,7 @@ struct Monkey {
     inspections: i64,
 }
 
-#[aoc(day11, part1)]
-pub fn day11_part1(input: &str) -> i64 {
+fn parse_monkeys(input: &str) -> Vec<Monkey> {
     let mut lines = input.lines();
     let mut monkeys = Vec::<Monkey>::new();
     loop {
@@ -44,7 +43,6 @@ pub fn day11_part1(input: &str) -> i64 {
         let starting_data = starting.next().unwrap();
         let starting_data = starting_data.split(", ");
         for d in starting_data {
-            dbg!(d);
             m.items.push_back(d.parse().unwrap())
         }
         // operation
@@ -95,8 +93,14 @@ pub fn day11_part1(input: &str) -> i64 {
         _ = lines.next();
         monkeys.push(m);
     }
+    monkeys
+}
+
+#[aoc(day11, part1)]
+pub fn day11_part1(input: &str) -> i64 {
+    let mut monkeys = parse_monkeys(input);
     for _ in 0..20 {
-        do_iteration(&mut monkeys);
+        do_iteration(&mut monkeys, true);
     }
     let mut top2: Vec<i64> = monkeys.iter().map(|m| m.inspections).collect();
     top2.sort();
@@ -104,13 +108,30 @@ pub fn day11_part1(input: &str) -> i64 {
     return top2[top2.len()-1] * top2[top2.len()-2];
 }
 
-fn do_iteration(monkeys: &mut Vec<Monkey>) {
+#[aoc(day11, part2)]
+pub fn day11_part2(input: &str) -> i64 {
+    let mut monkeys = parse_monkeys(input);
+    for _ in 0..10000 {
+        do_iteration(&mut monkeys, false);
+    }
+    let mut top2: Vec<i64> = monkeys.iter().map(|m| m.inspections).collect();
+    top2.sort();
+    return top2[top2.len()-1] * top2[top2.len()-2];
+}
+
+fn do_iteration(monkeys: &mut Vec<Monkey>, divide_by_3: bool) {
     let mut n = 0;
+    let monkey_factor = monkeys.iter().map(|m|{m.test}).reduce(|accum, item| { accum * item}).unwrap();
     while n < monkeys.len() {
         while let Some(mut i) = monkeys[n].items.pop_front() {
             monkeys[n].inspections += 1;
             i = (monkeys[n].operation)(i);
-            i /= 3;
+            if divide_by_3 {
+                i /= 3;
+            } else {
+                i %= monkey_factor;
+
+            }
             let offset;
             if i % monkeys[n].test == 0 {
                 offset = monkeys[n].true_offset;
